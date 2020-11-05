@@ -37,6 +37,18 @@ class AM():
         else:
             self.config['decoder_config'].update({'model_type': 'Transducer'})
             self.model_type = 'Transducer'
+
+    def tdnn_model(self, training):
+        from AMmodel.tdnn import TimeDelayNNTransducer
+        self.model_config.update({'vocabulary_size': self.text_feature.num_classes})
+        if self.model_config['name'] == 'TimeDelayNNTransducer':
+            self.model_config.pop('LAS_decoder')
+            self.model_config.pop('enable_tflite_convertible')
+            self.model_config.update({'speech_config': self.speech_config})
+            self.model = TimeDelayNNTransducer(**self.model_config)
+        else:
+            raise ValueError('not in supported model list')
+
     def conformer_model(self,training):
         from AMmodel.conformer import ConformerTransducer, ConformerCTC, ConformerLAS
         self.model_config.update({'vocabulary_size': self.text_feature.num_classes})
@@ -113,10 +125,10 @@ class AM():
             self.espnet_model(training)
         elif 'Multi' in self.model_config['name']:
             self.multi_task_model(training)
-
-
         elif 'Conformer' in self.model_config['name']:
             self.conformer_model(training)
+        elif 'TimeDelayNN' in self.model_config['name']:
+            self.tdnn_model(training)
         else:
             self.ds2_model(training)
         self.model.add_featurizers(self.text_feature)
@@ -167,17 +179,17 @@ class AM():
             data = self.speech_feature.load_wav(fp)
         if self.model.mel_layer is None:
             mel=self.speech_feature.extract(data)
-            mel=np.expand_dims(mel,0)
+            mel=np.expand_dims(mel, 0)
 
-            input_length=np.array([[mel.shape[1]//self.model.time_reduction_factor]],'int32')
+            input_length = np.array([[mel.shape[1]//self.model.time_reduction_factor]],'int32')
         else:
-            mel=data.reshape([1,-1,1])
+            mel=data.reshape([1, -1, 1])
             input_length = np.array([[mel.shape[1] // self.model.time_reduction_factor//160]], 'int32')
-        result=self.model.recognize_pb(mel,input_length)[0]
+        result=self.model.recognize_pb(mel, input_length)[0]
 
         return result
 
-    def load_checkpoint(self,config):
+    def load_checkpoint(self, config: object) -> object:
         """Load checkpoint."""
 
         self.checkpoint_dir = os.path.join(config['learning_config']['running_config']["outdir"], "checkpoints")
