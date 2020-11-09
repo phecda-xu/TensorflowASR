@@ -60,10 +60,10 @@ learning_config:
     epsilon: 1e-9
 
   running_config:
-    batch_size: 4
+    batch_size: 8
     train_steps_per_batches: 10
     eval_steps_per_batches: 10
-    num_epochs: 2
+    num_epochs: 30
     outdir: './conformer-logs'
     log_interval_steps: 300
     eval_interval_steps: 500
