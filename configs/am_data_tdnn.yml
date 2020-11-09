@@ -64,10 +64,10 @@ learning_config:
     train_steps_per_batches: 10
     eval_steps_per_batches: 10
     num_epochs: 30
-    outdir: './conformer-logs'
+    outdir: './tdnn-logs'
     log_interval_steps: 300
-    eval_interval_steps: 500
-    save_interval_steps: 500
+    eval_interval_steps: 1000
+    save_interval_steps: 1000
     guide_attention: False #for LAS
   redis_config:
     use_redis: False
